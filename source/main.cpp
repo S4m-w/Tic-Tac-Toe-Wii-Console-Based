@@ -20,7 +20,7 @@ void init(){
 	VIDEO_WaitVSync();
 	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
 }
-
+//nigga
 char square[10] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
 int checkwin()
 {
