@@ -1,4 +1,4 @@
-main.o: /home/sam/Schreibtisch/wii/source/main.cpp \
+main.o: /home/sam/sources/tttwii/source/main.cpp \
  /opt/devkitpro/libogc/include/gccore.h \
  /opt/devkitpro/libogc/include/ogc/dsp.h \
  /opt/devkitpro/libogc/include/gctypes.h \

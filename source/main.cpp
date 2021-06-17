@@ -1,12 +1,74 @@
 #include <iostream>
+#include <time.h>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 static void *xfb = NULL;
 static GXRModeObj *rmode = NULL;
 u32 size;
 int choice;
+std::string square[10] = {"NONE", " ", " ", " ", " ", " ", " ", " ", " ", " "}; 
 int player = 1,game_i;
-using namespace std;
+int currentselection = 1;
+int tie = 0;
+bool onetime = true;
+
+std::string bak[10] {square[0],square[1],square[2],square[3],square[4],square[5],square[6],square[7],square[8],square[9]};
+void board()
+{
+	printf("\x1b[2J");
+    std::cout << "\n\n\tTic Tac Toe\n\n";
+
+    std::cout << std::endl;
+
+    std::cout << "     |     |     " << std::endl;
+    std::cout << "  " << square[1] << "  |  " << square[2] << "  |  " << square[3] << std::endl;
+				
+    std::cout << "_____|_____|_____" << std::endl;
+    std::cout << "     |     |     " << std::endl;
+
+    std::cout << "  " << square[4] << "  |  " << square[5] << "  |  " << square[6] << std::endl;
+
+    std::cout << "_____|_____|_____" << std::endl;
+    std::cout << "     |     |     " << std::endl;
+
+    std::cout << "  " << square[7] << "  |  " << square[8] << "  |  " << square[9] << std::endl;
+
+    std::cout << "     |     |     " << std::endl << std::endl;
+}
+void reset()  {
+	bak[1] = " ";
+			bak[2] = " ";
+			bak[3] = " ";
+			bak[4] = " ";
+			bak[5] = " ";
+			bak[6] = " ";
+			bak[7] = " ";
+			bak[8] = " ";
+			bak[9] = " ";
+			square[1] = " ";
+			square[2] = " ";
+			square[3] = " ";
+			square[4] = " ";
+			square[5] = " ";
+			square[6] = " ";
+			square[7] = " ";
+			square[8] = " ";
+			square[9] = " ";
+			board();
+}
+
+void restore(std::string bak[10]){
+	square[0] = bak[0];
+	square[1] = bak[1];
+	square[2] = bak[2];
+	square[3] = bak[3];
+	square[4] = bak[4];
+	square[5] = bak[5];
+	square[6] = bak[6];
+	square[7] = bak[7];
+	square[8] = bak[8];
+	square[9] = bak[9];
+}
 void init(){
 	VIDEO_Init();
 	WPAD_Init();
@@ -20,211 +82,422 @@ void init(){
 	VIDEO_WaitVSync();
 	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
 }
-//nigga
-char square[10] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
-int checkwin()
-{
-    if (square[1] == square[2] && square[2] == square[3])
+void place(int selection){
+	if(player == 1){
+		square[selection] = "X";
+		bak[selection] = "X";
+		player++;
+		tie++;
+		
+		
+		
+	}else if(player == 2){
+		square[selection] = "O";			
 
-        return 1;
-    else if (square[4] == square[5] && square[5] == square[6])
+		bak[selection] = "O";
+		player--;
+		tie++;
+	}
+	}
 
-        return 1;
-    else if (square[7] == square[8] && square[8] == square[9])
-
-        return 1;
-    else if (square[1] == square[4] && square[4] == square[7])
-
-        return 1;
-    else if (square[2] == square[5] && square[5] == square[8])
-
-        return 1;
-    else if (square[3] == square[6] && square[6] == square[9])
-
-        return 1;
-    else if (square[1] == square[5] && square[5] == square[9])
-
-        return 1;
-    else if (square[3] == square[5] && square[5] == square[7])
-
-        return 1;
-    else if (square[1] != '1' && square[2] != '2' && square[3] != '3' 
-                    && square[4] != '4' && square[5] != '5' && square[6] != '6' 
-                  && square[7] != '7' && square[8] != '8' && square[9] != '9')
-
-        return 0;
-    else
-        return -1;
-}
 
 void menu(){
 	std::cout << "Tic Tac Toe Wii Edition\n\n";
-	std::cout << "[A] Play [B] Exit\n";
-    
+	std::cout << "[A] Play [HOME] Exit\n"; 
 }
 
-void board()
-{
-    cout << "\n\n\tTic Tac Toe\n\n";
 
-    cout << endl;
 
-    cout << "     |     |     " << endl;
-    cout << "  " << square[1] << "  |  " << square[2] << "  |  " << square[3] << endl;
-
-    cout << "_____|_____|_____" << endl;
-    cout << "     |     |     " << endl;
-
-    cout << "  " << square[4] << "  |  " << square[5] << "  |  " << square[6] << endl;
-
-    cout << "_____|_____|_____" << endl;
-    cout << "     |     |     " << endl;
-
-    cout << "  " << square[7] << "  |  " << square[8] << "  |  " << square[9] << endl;
-
-    cout << "     |     |     " << endl << endl;
-}
 void keyboard(){
-int currentselection = 1;
+	int currentselection = 1;
+onetime = true;
+	
+
 	while(true){
 		WPAD_ScanPads();
-		u32 pressedkey = WPAD_ButtonsDown(0);
+        u32 pressedkey = WPAD_ButtonsDown(0);
+		if(bak[1] == "X" && bak[2] == "X" && bak[3] == "X"){
+				if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+        if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+			onetime = true;
+			continue;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+		
+		}
+	if(bak[1] == "X" && bak[4] == "X" && bak[7] == "X" ){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+onetime = true;
+
+		
+		}
+	}
+    if(bak[1] == "X" && bak[5] == "X" && bak[9] == "X"){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+		
+continue;
+		
+		}
+	}
+	if(bak[2] == "X" && bak[5] == "X" && bak[8] == "X"){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+	else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[3] == "X" && bak[6] == "X" && bak[9] == "X"){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[3] == "X" && bak[5] == "X" && bak[7] == "X"){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[4] == "X" && bak[5] == "X" && bak[6] == "X"){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+	else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[7] == "X" && bak[8] == "X" && bak[9] == "X"){
+		if(onetime){
+	std::cout << "Player 1 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	} 
+	if(bak[1] == "O" && bak[2] == "O" && bak[3] == "O"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+		}
+	if(bak[1] == "O" && bak[4] == "O" && bak[7] == "O" ){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+    if(bak[1] == "O" && bak[5] == "O" && bak[9] == "O"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[2] == "O" && bak[5] == "O" && bak[8] == "O"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[3] == "O" && bak[6] == "O" && bak[9] == "O"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[3] == "O" && bak[5] == "O" && bak[7] == "O"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[4] == "O" && bak[5] == "O" && bak[6] == "Ocontinue;"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+continue;
+		
+		}
+	}
+	if(bak[7] == "O" && bak[8] == "O" && bak[9] == "O"){
+		if(onetime){
+	std::cout << "Player 2 has won! Press B to quit and the a key to play again!";
+	onetime = false;
+}
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey & WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+            onetime = true;
+		continue;
+		}
+	}
+	if(tie == 9){
+		if(onetime){
+std::cout << "Tie! Press B to quit and the a key to play again!";
+onetime = false;
+		}
+		
+		if(pressedkey & WPAD_BUTTON_B){
+			exit(0);
+		}
+		else if(pressedkey == WPAD_BUTTON_A){
+			tie = 0;
+			player = 1;
+			reset();
+currentselection = 1;
+onetime = true;
+onetime = true;
+continue;
+		
+		}
+	}
+		
+	
 		if(pressedkey & WPAD_BUTTON_LEFT){
+			if(square[currentselection] != "X" || square[currentselection] != "O"){
+				restore(bak);
+			}
 			if(currentselection <= 1){
-				return;
+				square[1] = 'I';
+				continue;
 			}
 			currentselection--;
-			square[currentselection] = 'V';
+			square[currentselection] = 'I';
+			board();
 		}
 		if(pressedkey & WPAD_BUTTON_RIGHT){
-			if(currentselection >= 9) return;
+			if(square[currentselection] != "X" && square[currentselection] != "O"){
+				restore(bak);
+			}
+			if(square[9] == "V"){
+				square[currentselection][9];				
+
+			}
+
+			if(currentselection >= 9) {
+square[9] = 'I';
+continue;
+			}
 			currentselection++;
-			square[currentselection] = 'V';
+			square[currentselection] = 'I';
+			board();
 		}
 		if(pressedkey & WPAD_BUTTON_A){
-			break;
+			if(bak[currentselection] != " "){
+				printf("\x1b[2J");
+				std::cout << "This square is already used!";
+				board();
+				continue;
+			}
+		
+			else{
+			    place(currentselection);
+				board();
+			}	
 		}
 	}
 }
 int main(int argc, char **argv) {
-	init();
-	char mark;
-	bool exit = false;
-	bool playing = false;
-	printf("\x1b[2;0H");
+	init();printf("\x1b[2J");
+		board();
+
 	while(true) {
 		WPAD_ScanPads();
 		u32 pressed = WPAD_ButtonsDown(0);
 		if ( pressed & WPAD_BUTTON_HOME ) return 0;
-		if(pressed & WPAD_BUTTON_B){
-			cout << "Do you really want to exit?" << endl << "Press B to exit and A to continue!";
-			while(true){
-				WPAD_ScanPads();
-				u32 pressed = WPAD_ButtonsDown(0);
-				if(pressed & WPAD_BUTTON_B){
-					game_i = 1;
-            		playing = false;
-					exit = true;
-					break; 
-				}
-				if(pressed & WPAD_BUTTON_A){
-					printf("\x1b[2J");
-					playing = true;
-					break;
-				}
-			}
-			if(exit) break;
-			
-			
-		}
-		if(pressed & WPAD_BUTTON_A){
-			printf("\x1b[2J");
-			playing = true;
-		}
-		if(playing){
-					do
-    {
-        board();
-        player=(player%2)?1:2;
-
-        keyboard();
-		printf("\x1b[2J");
-        mark=(player == 1) ? 'X' : 'O';
-		if (choice == 1 && square[1] == '1')
-
-            square[1] = mark;
-        else if (choice == 2 && square[2] == '2')
-
-            square[2] = mark;
-        else if (choice == 3 && square[3] == '3')
-
-            square[3] = mark;
-        else if (choice == 4 && square[4] == '4')
-
-            square[4] = mark;
-        else if (choice == 5 && square[5] == '5')
-
-            square[5] = mark;
-        else if (choice == 6 && square[6] == '6')
-
-            square[6] = mark;
-        else if (choice == 7 && square[7] == '7')
-
-            square[7] = mark;
-        else if (choice == 8 && square[8] == '8')
-
-            square[8] = mark;
-        else if (choice == 9 && square[9] == '9')
-
-            square[9] = mark;
-        else
-        {
-            cout<< "Dieser Zug ist nicht moeglich!";
-
-            player--;
-            cin.ignore();
-            cin.get();
-        }
-        game_i=checkwin();
-
-        player++;
-    }while(game_i==-1);
-    board();
-    if(game_i==1){
-		printf("\x1b[2J");
-        cout<<"==>\aSpieler "<<--player<<" hat gewonnen. \n";
-		square[0] = 'o';
-		square[1] = ' ';
-		square[2] = ' ';
-		square[3] = ' ';
-		square[4] = ' ';
-		square[5] = ' ';
-		square[6] = ' ';
-		square[7] = ' ';
-		square[8] = ' ';
-		square[9] = ' ';
-		menu();
-		playing = false;
-	}
-    else{
-		printf("\x1b[2J");
-        cout<<"==>\aUnentschieden!\n";
-		square[0] = 'o';
-		square[1] = ' ';
-		square[2] = ' ';
-		square[3] = ' ';
-		square[4] = ' ';
-		square[5] = ' ';
-		square[6] = ' ';
-		square[7] = ' ';
-		square[8] = ' ';
-		square[9] = ' ';
-		menu();
-		playing = false;
-	}
-		}
+		board();
+		keyboard();
 		VIDEO_WaitVSync();
 	}
-    
 	return 0;
 }
